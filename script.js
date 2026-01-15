@@ -7,15 +7,6 @@ window;
 Splitting();
 
 const BTN = document.querySelector('.birthday-button__button');
-
-
-const OVERLAY2 = document.querySelector('#project2Overlay');
-const FRAME2 = document.querySelector('#project2Frame');
-
-
-const CONTINUE_BTN = document.querySelector('#continueBtn');
-
-
 const SOUNDS = {
   CHEER: new Audio(
   'https://s3-us-west-2.amazonaws.com/s.cdpn.io/605876/cheer.mp3'),
@@ -23,7 +14,7 @@ const SOUNDS = {
   MATCH: new Audio(
   'https://s3-us-west-2.amazonaws.com/s.cdpn.io/605876/match-strike-trimmed.mp3'),
 
-  TUNE: new Audio(
+ TUNE: new Audio(
   './happy-birthday-guitar-11795.mp3'),
 
   ON: new Audio('https://assets.codepen.io/605876/switch-on.mp3'),
@@ -127,17 +118,6 @@ set('.cake__face--straining', { display: 'block' }).
 to(
 '.birthday-button',
 {
-
-onComplete: () => {
-  OVERLAY2.style.display = 'block';
-
-  // (opcional) recarga el iframe por si ya estaba “congelado”
-  FRAME2.src = FRAME2.src;
-
-  BTN.removeAttribute('disabled');
-},
-
-
   onComplete: () => {
     set('.cake__face--straining', { display: 'none' });
     set('.cake__face', { display: 'block' });
@@ -221,7 +201,9 @@ const RESET = () => {
     scale: 0,
     transformOrigin: '50% 50%' });
 
-  set('.birthday-button', { scale: 0.6, x: 0, y: 0 });
+  const isMobile = window.matchMedia('(max-width: 480px)').matches;
+set('.birthday-button', { scale: isMobile ? 1 : 0.8, x: 0, y: 0 });
+
   set('.birthday-button__cake', { display: 'none' });
   set('.cake__candle', { scaleY: 0, transformOrigin: '50% 100%' });
 };
@@ -231,7 +213,7 @@ const MASTER_TL = timeline({
     SOUNDS.ON.play();
   },
   onComplete: () => {
-    //delayedCall(2, RESET);
+    delayedCall(2, RESET);
     BTN.removeAttribute('disabled');
   },
   paused: true }).
