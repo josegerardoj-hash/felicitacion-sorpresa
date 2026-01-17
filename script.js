@@ -256,3 +256,45 @@ const toggleAudio = () => {
 };
 
 document.querySelector('#volume').addEventListener('input', toggleAudio);
+
+/* ===== Fondo con emojis flotando ===== */
+const bg = document.querySelector('.party-bg');
+
+const EMOJIS = [
+  "🎈","🎉","🎊","🥳","🎂","🧁","🍰","✨","💖","🌟","🎁"
+];
+
+function rand(min, max){ return Math.random() * (max - min) + min; }
+
+function spawnEmoji(){
+  if (!bg) return;
+
+  const el = document.createElement('span');
+  el.className = 'party-emoji';
+  el.textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+
+  const size = rand(18, 42);
+  const x = rand(0, 100);
+  const dur = rand(10, 22);
+  const sway = rand(1.8, 3.2);
+  const opacity = rand(0.35, 0.85);
+
+  el.style.setProperty('--size', `${size}px`);
+  el.style.setProperty('--x', `${x}vw`);
+  el.style.setProperty('--dur', `${dur}s`);
+  el.style.setProperty('--sway', `${sway}s`);
+  el.style.setProperty('--opacity', opacity.toFixed(2));
+
+  bg.appendChild(el);
+
+  // elimina después para no acumular
+  setTimeout(() => el.remove(), (dur + 2) * 1000);
+}
+
+// densidad (ajústalo)
+for(let i=0; i<22; i++){
+  setTimeout(spawnEmoji, i * 250);
+}
+setInterval(spawnEmoji, 450);
+
+
