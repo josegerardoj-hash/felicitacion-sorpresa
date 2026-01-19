@@ -266,3 +266,28 @@ body{
   z-index: 1;          /* debajo del botón/cake */
   pointer-events: none;
 }
+
+.party-emoji{
+  position: absolute;
+  left: var(--x);
+  top: 110%;
+  font-size: var(--size);
+  opacity: var(--opacity);
+  transform: translateZ(0);
+  font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", system-ui, sans-serif;
+
+  animation:
+    floatUp var(--dur) linear infinite,
+    sway var(--sway) ease-in-out infinite alternate;
+
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.12));
+  user-select: none;
+  will-change: transform, top;
+  contain: layout paint; /* ayuda en móvil */
+}
+
+/* si el usuario tiene reducción de movimiento */
+@media (prefers-reduced-motion: reduce){
+  .party-emoji{ animation: none !important; }
+}
+

@@ -257,27 +257,50 @@ const toggleAudio = () => {
 
 document.querySelector('#volume').addEventListener('input', toggleAudio);
 
-/* ===== Fondo con emojis flotando ===== */
+/* ===== Fondo con emojis flotando (OPTIMIZADO MÓVIL) ===== */
 const bg = document.querySelector('.party-bg');
 
-const EMOJIS = [
-  "🎈","🎉","🎊","🥳","🎂","🧁","🍰","✨","💖","🌟","🎁"
-];
+const EMOJIS = ["🎈","🎉","🎊","🥳","🎂","🧁","🍰","✨","💖","🌟","🎁"];
 
 function rand(min, max){ return Math.random() * (max - min) + min; }
 
+const isMobile =
+  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+  window.matchMedia('(max-width: 600px)').matches;
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Ajustes según dispositivo */
+const SETTINGS = {
+  maxOnScreen: isMobile ? 18 : 36,          // máximo emojis simultáneos
+  intervalMs:  isMobile ? 750 : 450,        // frecuencia de nuevos emojis
+  startCount:  isMobile ? 10 : 22,          // arranque inicial
+  sizeMin:     isMobile ? 16 : 18,
+  sizeMax:     isMobile ? 34 : 42,
+  durMin:      isMobile ? 12 : 10,
+  durMax:      isMobile ? 24 : 22,
+  swayMin:     isMobile ? 2.2 : 1.8,
+  swayMax:     isMobile ? 3.6 : 3.2,
+  opMin:       0.35,
+  opMax:       0.85
+};
+
+let running = !reduceMotion;
+let emojiCount = 0;
+
 function spawnEmoji(){
-  if (!bg) return;
+  if (!bg || !running) return;
+  if (emojiCount >= SETTINGS.maxOnScreen) return;
 
   const el = document.createElement('span');
   el.className = 'party-emoji';
-  el.textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+  el.textContent = EMOJIS[(Math.random() * EMOJIS.length) | 0];
 
-  const size = rand(18, 42);
+  const size = rand(SETTINGS.sizeMin, SETTINGS.sizeMax);
   const x = rand(0, 100);
-  const dur = rand(10, 22);
-  const sway = rand(1.8, 3.2);
-  const opacity = rand(0.35, 0.85);
+  const dur = rand(SETTINGS.durMin, SETTINGS.durMax);
+  const sway = rand(SETTINGS.swayMin, SETTINGS.swayMax);
+  const opacity = rand(SETTINGS.opMin, SETTINGS.opMax);
 
   el.style.setProperty('--size', `${size}px`);
   el.style.setProperty('--x', `${x}vw`);
@@ -286,15 +309,45 @@ function spawnEmoji(){
   el.style.setProperty('--opacity', opacity.toFixed(2));
 
   bg.appendChild(el);
+  emojiCount++;
 
-  // elimina después para no acumular
-  setTimeout(() => el.remove(), (dur + 2) * 1000);
+  // elimina después: usar {once:true} reduce overhead
+  const ttl = (dur + 2) * 1000;
+  setTimeout(() => {
+    el.remove();
+    emojiCount--;
+  }, ttl);
 }
 
-// densidad (ajústalo)
-for(let i=0; i<22; i++){
-  setTimeout(spawnEmoji, i * 250);
+/* Arranque suave (no de golpe) */
+for (let i = 0; i < SETTINGS.startCount; i++) {
+  setTimeout(spawnEmoji, i * (isMobile ? 180 : 120));
 }
-setInterval(spawnEmoji, 450);
+
+/* Intervalo principal */
+let timer = null;
+function startLoop(){
+  if (timer || reduceMotion) return;
+  timer = setInterval(spawnEmoji, SETTINGS.intervalMs);
+}
+function stopLoop(){
+  if (!timer) return;
+  clearInterval(timer);
+  timer = null;
+}
+
+startLoop();
+
+/* Pausa cuando cambias de pestaña (mejora mucho en móvil) */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    running = false;
+    stopLoop();
+  } else {
+    running = true;
+    startLoop();
+  }
+});
+
 
 
